@@ -77,13 +77,14 @@ export const StorageService = {
           funcionario: employee?.name || 'Desconhecido',
           tipo: log.type === 'ENTRADA' ? 'ENTRADA' : 'SAÍDA',
           obra: site?.name || 'Desconhecida',
-          foto: 'Imagem salva no App' // Sending huge base64 might fail on free Google Script quota, sending text placeholder or need blob upload logic (complex). keeping simple for now.
+          foto: log.photoSnapshot || '' // Sending base64 string
         };
 
         // Use no-cors to avoid CORS preflight issues with Google Script Web Apps
+        // Note: 'no-cors' mode prevents reading the response, but sends the data.
         await fetch(settings.googleSheetUrl, {
           method: 'POST',
-          mode: 'no-cors',
+          mode: 'no-cors', 
           headers: {
             'Content-Type': 'application/json',
           },

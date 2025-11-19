@@ -19,23 +19,40 @@ export const Settings: React.FC = () => {
   };
 
   const scriptCode = `function doPost(e) {
+  // Configuração do Script para Exempland Control v1.5
+  
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   
+  // Cria cabeçalho se não existir
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["Data", "Hora", "Funcionário", "Tipo", "Obra"]);
+    sheet.appendRow(["Data", "Hora", "Funcionário", "Tipo", "Obra", "Foto"]);
   }
 
-  var data = JSON.parse(e.postData.contents);
-  
-  sheet.appendRow([
-    data.data,
-    data.hora,
-    data.funcionario,
-    data.tipo,
-    data.obra
-  ]);
-  
-  return ContentService.createTextOutput(JSON.stringify({ "result": "success" })).setMimeType(ContentService.MimeType.JSON);
+  try {
+    var data = JSON.parse(e.postData.contents);
+    
+    // Adiciona a linha com os dados
+    // Nota: A foto é um texto longo (Base64). 
+    // Para visualizar, copie o texto e cole em um visualizador Base64 online, 
+    // ou use a fórmula IMAGE() se converter para URL pública (requer upload de arquivo, script mais complexo).
+    // Aqui salvamos o texto bruto para garantir o backup.
+    
+    sheet.appendRow([
+      data.data,
+      data.hora,
+      data.funcionario,
+      data.tipo,
+      data.obra,
+      data.foto || "Sem foto"
+    ]);
+    
+    return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }`;
 
   const copyToClipboard = () => {
@@ -60,6 +77,10 @@ export const Settings: React.FC = () => {
         </div>
 
         <div className="space-y-6">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+                <strong>Atenção:</strong> Você deve atualizar o script na sua planilha para aceitar o envio da foto.
+            </div>
+
             {/* Step 1 */}
             <div className="border-l-4 border-blue-500 pl-4 py-1">
                 <h4 className="font-medium text-slate-900">Passo 1: Criar Script no Google Sheets</h4>
@@ -67,7 +88,7 @@ export const Settings: React.FC = () => {
                     Abra sua planilha Google, vá em <strong>Extensões {'>'} Apps Script</strong>. Apague todo o código lá e cole o código abaixo:
                 </p>
                 <div className="relative">
-                    <pre className="bg-slate-900 text-slate-50 p-4 rounded-lg text-xs overflow-x-auto font-mono">
+                    <pre className="bg-slate-900 text-slate-50 p-4 rounded-lg text-xs overflow-x-auto font-mono whitespace-pre-wrap h-64">
                         {scriptCode}
                     </pre>
                     <button 
@@ -84,9 +105,10 @@ export const Settings: React.FC = () => {
             <div className="border-l-4 border-blue-500 pl-4 py-1">
                 <h4 className="font-medium text-slate-900">Passo 2: Implantar como App da Web</h4>
                 <ol className="list-decimal list-inside text-sm text-slate-600 space-y-1 mt-2">
-                    <li>No editor do Script, clique em <strong>Implantar (Deploy) {'>'} Nova implantação</strong>.</li>
+                    <li>No editor do Script, clique em <strong>Implantar (Deploy) {'>'} Nova implantação (ou Gerenciar Implantações para atualizar)</strong>.</li>
                     <li>Selecione o tipo <strong>App da Web</strong>.</li>
                     <li>Em "Quem pode acessar", selecione <strong>Qualquer pessoa (Anyone)</strong>. <span className="text-red-500 font-bold">*Importante</span></li>
+                    <li>Se estiver atualizando, clique no ícone de lápis e escolha "Nova Versão".</li>
                     <li>Clique em Implantar e copie a <strong>URL do App da Web</strong>.</li>
                 </ol>
             </div>
