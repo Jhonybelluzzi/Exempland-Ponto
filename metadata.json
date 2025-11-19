@@ -1,0 +1,7 @@
+{
+  "name": "Exempland Control",
+  "description": "Sistema de registro de ponto com reconhecimento facial simples, gestão de obras e painel administrativo com IA.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
